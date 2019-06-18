@@ -35,9 +35,9 @@ namespace ARXIVDownloader.Helper
             WriteLine("\nPress any key to exit.");
         }
 
-        internal void Clear(string phrase)
+        internal void Clear()
         {
-            _form.LogPanel = _form.LogPanel.Replace(phrase, "");
+            _form.LogPanel = "";
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using ARXIVDownloader.Handler;
 using ARXIVDownloader.Helper;
+using ARXIVDownloader.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,13 +11,14 @@ using System.Threading.Tasks;
 
 namespace ARXIVDownloader.Core
 {
-    class ARXIV : Download
+    class ARXIV : Download, IARXIV
     {
         private Form1 form1;
         private string URL { get; set; }
         public string content { get; set; }
         public int results { get; set; }
         public List<string> PDFList { get; set; }
+        private bool _f_process = true;
 
         public ARXIV(Form1 form1)
         {
@@ -89,14 +91,17 @@ namespace ARXIVDownloader.Core
 
         internal void Download()
         {
+            _f_process = true;
             PDFList = new List<String>();
             this.form1.UpdateDownloadButton("Downloading...", false);
+            this.log.Show("Downloading start...");
             if (results > 200)
             {
                 CollectLinksInSinglePage(this.content);
                 int numPages = (results / 200) + 1;
                 for (int i = 1; i < numPages; i++)
                 {
+                    if (!_f_process) break;
                     this.content = LoadPage(URL: nextPage(URL, i));
                     CollectLinksInSinglePage(this.content);
                 }
@@ -106,6 +111,14 @@ namespace ARXIVDownloader.Core
                 CollectLinksInSinglePage(this.content);
             }
             int length = PDFList.Count;
+            if(results > 0)
+            {
+                this.form1.UpdateDownloadButton("Download " + results.ToString(), true);
+            }
+            if(!_f_process)
+            {
+                this.log.Show("Downloading aborted.");
+            }
         }
 
         private string nextPage(string URL, int page)
@@ -128,8 +141,10 @@ namespace ARXIVDownloader.Core
             Match match;
             for (match = regex.Match(input); match.Success; match = match.NextMatch())
             {
+                if (!_f_process) break;
                 foreach (Group group in match.Groups)
                 {
+                    if (!_f_process) break;
                     if (group.Value.ToLower().Contains("pdf") && !group.Value.ToLower().Contains("href="))
                     {
                         log.Show(">> " + group);
@@ -138,6 +153,11 @@ namespace ARXIVDownloader.Core
                     }
                 }
             }
+        }
+
+        public void MissionAborted()
+        {
+            _f_process = false;
         }
     }
 }

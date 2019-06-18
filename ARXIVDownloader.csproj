@@ -57,6 +57,7 @@
     <Compile Include="Helper\Console.cs" />
     <Compile Include="Helper\Log.cs" />
     <Compile Include="Helper\Validation.cs" />
+    <Compile Include="Interfaces\IARXIV.cs" />
     <Compile Include="Interfaces\IForm.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

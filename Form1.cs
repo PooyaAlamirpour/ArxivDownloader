@@ -73,6 +73,14 @@ namespace ARXIVDownloader
             int results = Convert.ToInt16(btnDownload.Text.Replace("Download ", ""));
             Task.Factory.StartNew(() => Arxiv.Download());
         }
-        
+
+        private void txtLog_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.C && e.Modifiers == Keys.Control)
+            {
+                Arxiv.MissionAborted();
+            }
+        }
+
     }
 }

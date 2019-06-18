@@ -62,6 +62,7 @@
             this.txtLog.Name = "txtLog";
             this.txtLog.Size = new System.Drawing.Size(510, 267);
             this.txtLog.TabIndex = 2;
+            this.txtLog.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtLog_KeyDown);
             // 
             // btnDownload
             // 
