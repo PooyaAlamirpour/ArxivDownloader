@@ -1,0 +1,8 @@
+D:\Partition G\Mine\CVPR2020\Refs\Tools\ARXIVDownloader\ARXIVDownloader\ARXIVDownloader\bin\Release\ARXIVDownloader.exe.config
+D:\Partition G\Mine\CVPR2020\Refs\Tools\ARXIVDownloader\ARXIVDownloader\ARXIVDownloader\bin\Release\ARXIVDownloader.exe
+D:\Partition G\Mine\CVPR2020\Refs\Tools\ARXIVDownloader\ARXIVDownloader\ARXIVDownloader\bin\Release\ARXIVDownloader.pdb
+D:\Partition G\Mine\CVPR2020\Refs\Tools\ARXIVDownloader\ARXIVDownloader\ARXIVDownloader\obj\Release\ARXIVDownloader.Form1.resources
+D:\Partition G\Mine\CVPR2020\Refs\Tools\ARXIVDownloader\ARXIVDownloader\ARXIVDownloader\obj\Release\ARXIVDownloader.Properties.Resources.resources
+D:\Partition G\Mine\CVPR2020\Refs\Tools\ARXIVDownloader\ARXIVDownloader\ARXIVDownloader\obj\Release\ARXIVDownloader.csproj.GenerateResource.Cache
+D:\Partition G\Mine\CVPR2020\Refs\Tools\ARXIVDownloader\ARXIVDownloader\ARXIVDownloader\obj\Release\ARXIVDownloader.exe
+D:\Partition G\Mine\CVPR2020\Refs\Tools\ARXIVDownloader\ARXIVDownloader\ARXIVDownloader\obj\Release\ARXIVDownloader.pdb
