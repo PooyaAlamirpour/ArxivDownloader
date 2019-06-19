@@ -3,7 +3,11 @@ using ARXIVDownloader.Helper;
 using ARXIVDownloader.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -15,10 +19,12 @@ namespace ARXIVDownloader.Core
     {
         private Form1 form1;
         private string URL { get; set; }
+        
+        private bool _f_process = true;
+        private string path { get; set; }
         public string content { get; set; }
         public int results { get; set; }
         public List<string> PDFList { get; set; }
-        private bool _f_process = true;
 
         public ARXIV(Form1 form1)
         {
@@ -89,36 +95,54 @@ namespace ARXIVDownloader.Core
             return results;
         }
 
-        internal void Download()
+        internal List<string> CollectAllAvailableLinks()
         {
-            _f_process = true;
-            PDFList = new List<String>();
-            this.form1.UpdateDownloadButton("Downloading...", false);
-            this.log.Show("Downloading start...");
-            if (results > 200)
+            path = this.form1.getFolderPath;
+            if(!path.Equals("NaN"))
             {
-                CollectLinksInSinglePage(this.content);
-                int numPages = (results / 200) + 1;
-                for (int i = 1; i < numPages; i++)
+                if(Directory.Exists(path))
                 {
-                    if (!_f_process) break;
-                    this.content = LoadPage(URL: nextPage(URL, i));
-                    CollectLinksInSinglePage(this.content);
+                    this.form1.setMaximumTotalProgressbar(results);
+                    _f_process = true;
+                    PDFList = new List<String>();
+                    this.form1.UpdateDownloadButton("Downloading...", false);
+                    this.log.Show("Downloading start...");
+                    if (results > 200)
+                    {
+                        CollectLinksInSinglePage(this.content);
+                        int numPages = (results / 200) + 1;
+                        for (int i = 1; i < numPages; i++)
+                        {
+                            if (!_f_process) break;
+                            this.content = LoadPage(URL: nextPage(URL, i));
+                            CollectLinksInSinglePage(this.content);
+                        }
+                    }
+                    else
+                    {
+                        CollectLinksInSinglePage(this.content);
+                    }
+                    int length = PDFList.Count;
+                    if (results > 0)
+                    {
+                        this.form1.UpdateDownloadButton("Download " + results.ToString(), true);
+                    }
+                    if (!_f_process)
+                    {
+                        this.log.Show("Downloading aborted.");
+                    }
+                    this.form1.updateTotalArticlesProgressbar(0);
+                }
+                else
+                {
+                    log.Show("Please choose valid path for saving articles.");
                 }
             }
             else
             {
-                CollectLinksInSinglePage(this.content);
+                log.Show("Please choose valid path for saving articles.");
             }
-            int length = PDFList.Count;
-            if(results > 0)
-            {
-                this.form1.UpdateDownloadButton("Download " + results.ToString(), true);
-            }
-            if(!_f_process)
-            {
-                this.log.Show("Downloading aborted.");
-            }
+            return PDFList;
         }
 
         private string nextPage(string URL, int page)
@@ -149,6 +173,8 @@ namespace ARXIVDownloader.Core
                     {
                         log.Show(">> " + group);
                         PDFList.Add(group.Value);
+                        DownloadSignleFile(group.Value + ".pdf");
+                        this.form1.updateTotalArticlesProgressbar(PDFList.Count);
                         Thread.Sleep(100);
                     }
                 }
@@ -159,5 +185,62 @@ namespace ARXIVDownloader.Core
         {
             _f_process = false;
         }
+
+        Stopwatch sw = new Stopwatch();
+        private async void DownloadSignleFile(String address)
+        {
+            string[] splitedAddress = address.Split('/');
+            string articleId = splitedAddress[splitedAddress.Length - 1].Replace(".pdf", "");
+            string tmpContent = LoadPage("https://arxiv.org/abs/" + articleId);
+            string filename = getArticleName(tmpContent);
+            using (WebClient client = new WebClient())
+            {
+                try
+                {
+                    client.Headers.Add("User-Agent: Other");
+                    client.DownloadProgressChanged += wc_DownloadProgressChanged;
+                    client.DownloadFileCompleted += wc_DownloadFileCompleted;
+                    await client.DownloadFileTaskAsync(new Uri(address), path + "\\" + filename.Replace(":", ",") + ".pdf");
+                }
+                catch (Exception ex)
+                {
+                    string tmp = ex.Message;
+                }
+            }
+        }
+
+        private void wc_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+            this.form1.updateDownloadProgressbar(e.ProgressPercentage);
+        }
+
+        private void wc_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            ((WebClient)sender).Dispose();
+        }
+
+        private string getArticleName(string input)
+        {
+            string articleName = "NaN";
+            Regex regex = new Regex("<h1\\s*(.+?)\\s*>\\s*(.+?)\\s*</h1>", RegexOptions.IgnoreCase);
+            Match match;
+            for (match = regex.Match(input); match.Success; match = match.NextMatch())
+            {
+                if (!_f_process) break;
+                foreach (Group group in match.Groups)
+                {
+                    if (!_f_process) break;
+                    if(!group.Value.Contains("<h1"))
+                    {
+                        if(group.Value.Contains("<span class=\"descriptor\">Title:</span>"))
+                        {
+                            articleName = group.Value.Replace("<span class=\"descriptor\">Title:</span>", "");
+                        }
+                    }
+                }
+            }
+            return articleName;
+        }
+        
     }
 }

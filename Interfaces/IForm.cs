@@ -10,5 +10,7 @@ namespace ARXIVDownloader.Interfaces
     {
         string LogPanel { get; set; }
         void UpdateDownloadButton(String label, bool Enable);
+        void setMaximumTotalProgressbar(int max);
+        String getFolderPath { get; set; }
     }
 }

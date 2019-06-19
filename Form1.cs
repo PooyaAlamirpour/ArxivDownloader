@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -26,6 +28,7 @@ namespace ARXIVDownloader
             if(e.KeyChar == (char)Keys.Enter)
             {
                 txtLog.Clear();
+                updateTotalArticlesProgressbar(0);
                 Task.Factory.StartNew(() => Arxiv.Process(txtLink.Text));
             }
         }
@@ -33,6 +36,7 @@ namespace ARXIVDownloader
         private void btnCheck_Click(object sender, EventArgs e)
         {
             txtLog.Clear();
+            updateTotalArticlesProgressbar(0);
             Task.Factory.StartNew(() => Arxiv.Process(txtLink.Text));
         }
 
@@ -68,10 +72,46 @@ namespace ARXIVDownloader
             }
         }
 
+        public void setMaximumTotalProgressbar(int max)
+        {
+            if (pbTotal.InvokeRequired)
+            {
+                pbTotal.BeginInvoke(new MethodInvoker(delegate()
+                    {
+                        pbTotal.Maximum = max;
+                    }));
+            }
+        }
+
+        internal void updateTotalArticlesProgressbar(int value)
+        {
+            if (pbTotal.InvokeRequired)
+            {
+                pbTotal.BeginInvoke(new MethodInvoker(delegate()
+                {
+                    pbTotal.Value = value;
+                }));
+            }
+        }
+
+        internal void updateDownloadProgressbar(int value)
+        {
+            if (pbDownload.InvokeRequired)
+            {
+                pbDownload.BeginInvoke(new MethodInvoker(delegate()
+                {
+                    pbDownload.Value = value;
+                }));
+            }
+        }
+
         private void btnDownload_Click(object sender, EventArgs e)
         {
             int results = Convert.ToInt16(btnDownload.Text.Replace("Download ", ""));
-            Task.Factory.StartNew(() => Arxiv.Download());
+            Task.Factory.StartNew(() =>
+            {
+                return Arxiv.CollectAllAvailableLinks();
+            });
         }
 
         private void txtLog_KeyDown(object sender, KeyEventArgs e)
@@ -82,5 +122,33 @@ namespace ARXIVDownloader
             }
         }
 
+        public String getFolderPath
+        {
+            get
+            {
+                string path = "NaN";
+                if (!txtFolderPath.Text.Equals(""))
+                {
+                    path = txtFolderPath.Text;
+                }
+                return path;
+            }
+            set
+            {
+                
+            }
+            
+        }
+
+        private void btnSelectFolder_Click(object sender, EventArgs e)
+        {
+            DialogResult result = folderBrowserDialog1.ShowDialog();
+
+            if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(folderBrowserDialog1.SelectedPath))
+            {
+                txtFolderPath.Text = folderBrowserDialog1.SelectedPath;
+            }
+           
+        }
     }
 }
