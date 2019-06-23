@@ -107,10 +107,10 @@ namespace ARXIVDownloader
 
         private void btnDownload_Click(object sender, EventArgs e)
         {
-            int results = Convert.ToInt16(btnDownload.Text.Replace("Download ", ""));
+            int results = Convert.ToInt16(btnDownload.Text.Replace("Download ", "").Replace(" remained", ""));
             Task.Factory.StartNew(() =>
             {
-                return Arxiv.CollectAllAvailableLinks();
+                Arxiv.DownloadAllLinks();
             });
         }
 
